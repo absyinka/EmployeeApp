@@ -135,17 +135,18 @@ public class EmployeeRepository : IEmployeeRepository
         }
     }
 
-    public async Task<bool> IsEmployeeExist(Guid id)
+    public async Task<bool> IsEmployeeExist(string email)
     {
         using var connection = (MySqlConnection)await _connectionFactory.CreateConnectionAsync();
-        string query = "SELECT COUNT(*) FROM Employees WHERE Id = @Id";
+        string query = "SELECT COUNT(*) FROM Employees WHERE Email = @Email";
         MySqlCommand command = new(query, connection);
-        command.Parameters.AddWithValue("@Id", id);
+        command.Parameters.AddWithValue("@Email", email);
 
         try
         {
-            int result = await command.ExecuteNonQueryAsync();
-            return result > 0;
+            object? result = await command.ExecuteScalarAsync();
+            int count = Convert.ToInt32(result);
+            return count == 1;
         }
         catch (MySqlException ex)
         {

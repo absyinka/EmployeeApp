@@ -9,5 +9,5 @@ public interface IEmployeeRepository
     Task<Employee> GetEmployeeById(Guid id);
     Task<bool> UpdateEmployee(Employee employee);
     Task<bool> DeleteEmployee(Guid id);
-    Task<bool> IsEmployeeExist(Guid id);
+    Task<bool> IsEmployeeExist(string email);
 }

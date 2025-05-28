@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeApp.Controllers;
 
-public class EmployeeController : Controller
+public class EmployeeController : BaseController
 {
     private readonly IEmployeeRepository _employeeRepository;
 
@@ -38,25 +38,31 @@ public class EmployeeController : Controller
     [HttpPost]
     public async Task<IActionResult> Create(CreateEmployeeViewModel model)
     {
-        if (ModelState.IsValid)
+        var isEmployeeExist = await _employeeRepository.IsEmployeeExist(model.Email);
+
+        if (isEmployeeExist)
         {
-            var employee = new Employee
-            {
-                Id = Guid.NewGuid(),
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                Email = model.Email,
-                Department = model.Department,
-                HireDate = model.HireDate,
-                Salary = model.Salary
-            };
+            SetFlashMessage($"Employee with this email {model.Email} already exists.", "error");
+            return View(model);
+        }
 
-            bool isAdded = await _employeeRepository.AddEmployee(employee);
+        var employee = new Employee
+        {
+            Id = Guid.NewGuid(),
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            Email = model.Email,
+            Department = model.Department,
+            HireDate = model.HireDate,
+            Salary = model.Salary
+        };
 
-            if (isAdded)
-            {
-                return RedirectToAction(nameof(Index));
-            }
+        bool isAdded = await _employeeRepository.AddEmployee(employee);
+
+        if (isAdded)
+        {
+            SetFlashMessage("Employee record created successfully!", "success");
+            return RedirectToAction(nameof(Index));
         }
 
         return View(model);
@@ -65,6 +71,12 @@ public class EmployeeController : Controller
     public async Task<IActionResult> Detail(Guid id)
     {
         var result = await _employeeRepository.GetEmployeeById(id);
+
+        if (result is null)
+        {
+            SetFlashMessage("Employee not found.", "error");
+            return RedirectToAction(nameof(Index));
+        }
 
         var viewModel = new EmployeeDetailViewModel
         {
@@ -97,7 +109,7 @@ public class EmployeeController : Controller
         return View(model);
     }
 
-   [HttpPost]
+    [HttpPost]
     public async Task<IActionResult> Edit(UpdateEmployeeViewModel model)
     {
         if (!ModelState.IsValid)
@@ -133,11 +145,12 @@ public class EmployeeController : Controller
 
         if (!result)
         {
-            TempData["Message"] = "Error deleting employee. Please try again.";
+            SetFlashMessage("Error deleting employee. Please try again.", "error");
             return RedirectToAction(nameof(Index));
         }
 
-        TempData["Message"] = "Employee deleted successfully.";
+        SetFlashMessage("Employee deleted successfully.", "success");
+
         return RedirectToAction(nameof(Index));
     }
 }

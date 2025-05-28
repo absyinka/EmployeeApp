@@ -43,6 +43,7 @@
     
     <div class="container">
         <main role="main" class="pb-3">
+            @await Html.PartialAsync("_FlashMessage")
             @RenderBody()
         </main>
     </div>
@@ -54,6 +55,13 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll('.toast').forEach(function (toastEl) {
+                new bootstrap.Toast(toastEl).show();
+            });
+        });
+    </script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

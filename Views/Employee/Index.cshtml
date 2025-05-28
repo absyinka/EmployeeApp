@@ -8,13 +8,6 @@
 <a asp-action="Create" class="btn btn-outline-success">Create New Employee</a>
 <hr>
 
-@if (TempData["Message"] is not null)
-{
-    <div class="alert alert-info" role="alert">
-        @TempData["Message"]
-    </div>
-}
-
 @if (!Model.Any())
 {
     <h5 class="text-danger">No records available!</h5>
